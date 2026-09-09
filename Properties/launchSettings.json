@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "Yoink Downloader (Package)": {
+      "commandName": "MsixPackage"
+    },
+    "Yoink Downloader (Unpackaged)": {
+      "commandName": "Project"
+    }
+  }
+}
