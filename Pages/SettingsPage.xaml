@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Page
+    x:Class="Yoink_Downloader.Pages.SettingsPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="24,16,24,24">
+        <StackPanel Spacing="16" HorizontalAlignment="Left">
+
+            <TextBlock Text="Settings" Style="{StaticResource TitleTextBlockStyle}" />
+
+            <!-- Tools -->
+            <Border Style="{StaticResource CardStyle}">
+                <StackPanel Spacing="12">
+                    <TextBlock Text="Tools" Style="{StaticResource SectionHeaderStyle}" />
+                    <TextBlock Style="{StaticResource CaptionTextBlockStyle}"
+                               Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                               TextWrapping="Wrap"
+                               Text="Leave a path blank to use whatever is on PATH." />
+
+                    <StackPanel>
+                        <TextBlock Text="yt-dlp" Style="{StaticResource FieldLabelStyle}" />
+                        <Grid ColumnSpacing="8">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBox x:Name="YtDlpPathBox" PlaceholderText="yt-dlp.exe" />
+                            <Button Grid.Column="1" Content="Browse..." Click="OnBrowseYtDlpClick" />
+                        </Grid>
+                    </StackPanel>
+
+                    <StackPanel>
+                        <TextBlock Text="ffmpeg" Style="{StaticResource FieldLabelStyle}" />
+                        <Grid ColumnSpacing="8">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBox x:Name="FfmpegPathBox" PlaceholderText="ffmpeg.exe" />
+                            <Button Grid.Column="1" Content="Browse..." Click="OnBrowseFfmpegClick" />
+                        </Grid>
+                    </StackPanel>
+
+                    <InfoBar x:Name="ToolsInfoBar" IsOpen="False" IsClosable="True" Severity="Informational" />
+                </StackPanel>
+            </Border>
+
+            <!-- Defaults -->
+            <Border Style="{StaticResource CardStyle}">
+                <StackPanel Spacing="12">
+                    <TextBlock Text="Defaults" Style="{StaticResource SectionHeaderStyle}" />
+
+                    <StackPanel>
+                        <TextBlock Text="Download folder" Style="{StaticResource FieldLabelStyle}" />
+                        <Grid ColumnSpacing="8">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBox x:Name="DefaultFolderBox" />
+                            <Button Grid.Column="1" Content="Browse..." Click="OnBrowseFolderClick" />
+                        </Grid>
+                    </StackPanel>
+
+                    <Grid ColumnSpacing="12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel>
+                            <TextBlock Text="Container" Style="{StaticResource FieldLabelStyle}" />
+                            <ComboBox x:Name="DefaultContainerBox" HorizontalAlignment="Stretch" SelectedIndex="0">
+                                <ComboBoxItem Content="MP4" Tag="mp4" />
+                                <ComboBoxItem Content="MKV" Tag="mkv" />
+                                <ComboBoxItem Content="WebM" Tag="webm" />
+                                <ComboBoxItem Content="MP3" Tag="mp3" />
+                            </ComboBox>
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="1">
+                            <TextBlock Text="Parallel downloads" Style="{StaticResource FieldLabelStyle}" />
+                            <NumberBox x:Name="ConcurrencyBox"
+                                       Value="2"
+                                       Minimum="1"
+                                       Maximum="8"
+                                       SpinButtonPlacementMode="Compact"
+                                       HorizontalAlignment="Stretch" />
+                        </StackPanel>
+                    </Grid>
+
+                    <ToggleSwitch x:Name="OpenFolderToggle"
+                                  Header="Open the folder when a download finishes"
+                                  OnContent="On" OffContent="Off" />
+                </StackPanel>
+            </Border>
+
+            <!-- About -->
+            <Border Style="{StaticResource CardStyle}">
+                <StackPanel Spacing="4">
+                    <TextBlock Text="About" Style="{StaticResource SectionHeaderStyle}" />
+                    <TextBlock Text="Yoink Downloader" Style="{StaticResource BodyTextBlockStyle}" />
+                    <TextBlock Text="A front end for yt-dlp and ffmpeg."
+                               Style="{StaticResource CaptionTextBlockStyle}"
+                               Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                </StackPanel>
+            </Border>
+
+        </StackPanel>
+    </ScrollViewer>
+</Page>

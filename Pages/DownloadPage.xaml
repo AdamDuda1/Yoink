@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Page
+    x:Class="Yoink_Downloader.Pages.DownloadPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="24,16,24,24">
+        <StackPanel Spacing="16" Width="NaN" HorizontalAlignment="Stretch">
+
+            <TextBlock Text="Download" Style="{StaticResource TitleTextBlockStyle}" />
+
+            <Border Style="{StaticResource CardStyle}">
+                <StackPanel Spacing="12">
+                    <TextBlock Text="Source" Style="{StaticResource SectionHeaderStyle}" />
+                    <Grid ColumnSpacing="8">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <TextBox x:Name="UrlBox"
+                                 PlaceholderText="Paste a video or playlist link"
+                                 TextChanged="OnOptionsChanged" />
+                        <Button Grid.Column="1" Content="Paste" Click="OnPasteClick" />
+                        <Button Grid.Column="2" Content="Fetch info" Click="OnFetchClick" />
+                    </Grid>
+
+                    <InfoBar x:Name="SourceInfoBar"
+                             IsOpen="False"
+                             IsClosable="True"
+                             Severity="Informational" />
+                </StackPanel>
+            </Border>
+
+            <Border Style="{StaticResource CardStyle}">
+                <Grid ColumnSpacing="16">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+
+                    <Border Width="160" Height="90"
+                            CornerRadius="4"
+                            Background="{ThemeResource ControlAltFillColorSecondaryBrush}">
+                        <FontIcon Glyph="&#xE714;"
+                                  FontSize="24"
+                                  Foreground="{ThemeResource TextFillColorTertiaryBrush}" />
+                    </Border>
+
+                    <StackPanel Grid.Column="1" Spacing="4" VerticalAlignment="Center">
+                        <TextBlock x:Name="VideoTitleText"
+                                   Text="No video loaded"
+                                   Style="{StaticResource SubtitleTextBlockStyle}"
+                                   TextTrimming="CharacterEllipsis" />
+                        <TextBlock x:Name="VideoMetaText"
+                                   Text="Paste a link and hit Fetch info"
+                                   Style="{StaticResource BodyTextBlockStyle}"
+                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <Border Style="{StaticResource CardStyle}">
+                <StackPanel Spacing="12">
+                    <TextBlock Text="Save to" Style="{StaticResource SectionHeaderStyle}" />
+
+                    <Grid ColumnSpacing="8">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <TextBox x:Name="FolderBox" PlaceholderText="Output folder" TextChanged="OnOptionsChanged" />
+                        <Button Grid.Column="1" Content="Browse..." Click="OnBrowseClick" />
+                    </Grid>
+
+                    <StackPanel>
+                        <TextBlock Text="File name template" Style="{StaticResource FieldLabelStyle}" />
+                        <TextBox x:Name="TemplateBox"
+                                 PlaceholderText="%(title)s.%(ext)s"
+                                 FontFamily="Consolas"
+                                 TextChanged="OnOptionsChanged" />
+                    </StackPanel>
+
+                </StackPanel>
+            </Border>
+
+            <!-- 6. Actions -->
+            <StackPanel Orientation="Horizontal" Spacing="8">
+                <Button Content="Add to queue"
+                        Style="{StaticResource AccentButtonStyle}"
+                        Click="OnAddToQueueClick" />
+                <Button Content="Reset" Click="OnResetClick" />
+            </StackPanel>
+
+        </StackPanel>
+    </ScrollViewer>
+</Page>

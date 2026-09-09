@@ -1,26 +1,12 @@
 using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Runtime.InteropServices.WindowsRuntime;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Controls.Primitives;
-using Microsoft.UI.Xaml.Data;
-using Microsoft.UI.Xaml.Input;
-using Microsoft.UI.Xaml.Media;
-using Microsoft.UI.Xaml.Navigation;
-using Windows.Foundation;
-using Windows.Foundation.Collections;
-
-// To learn more about WinUI, the WinUI project structure,
-// and more about our project templates, see: http://aka.ms/winui-project-info.
+using Microsoft.UI.Xaml.Media.Animation;
+using Yoink_Downloader.Pages;
 
 namespace Yoink_Downloader
 {
-    /// <summary>
-    /// An empty window that can be used on its own or navigated to within a Frame.
-    /// </summary>
+    /// <summary>Shell window: title bar + left nav + a Frame the pages get loaded into.</summary>
     public sealed partial class MainWindow : Window
     {
         public MainWindow()
@@ -28,6 +14,28 @@ namespace Yoink_Downloader
             InitializeComponent();
             ExtendsContentIntoTitleBar = true;
             SetTitleBar(AppTitleBar);
+
+            ContentFrame.Navigate(typeof(DownloadPage));
+        }
+
+        private void NavView_SelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)
+        {
+            if (args.SelectedItem is not NavigationViewItem item)
+            {
+                return;
+            }
+
+            Type target = item.Tag switch
+            {
+                "queue" => typeof(QueuePage),
+                "settings" => typeof(SettingsPage),
+                _ => typeof(DownloadPage)
+            };
+
+            if (ContentFrame.CurrentSourcePageType != target)
+            {
+                ContentFrame.Navigate(target, null, new EntranceNavigationTransitionInfo());
+            }
         }
     }
 }

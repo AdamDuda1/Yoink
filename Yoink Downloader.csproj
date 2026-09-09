@@ -7,11 +7,43 @@
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <Platforms>x86;x64;ARM64</Platforms>
     <RuntimeIdentifiers>win-x86;win-x64;win-arm64</RuntimeIdentifiers>
-    <PublishProfile>win-$(Platform).pubxml</PublishProfile>
     <UseWinUI>true</UseWinUI>
     <WinUISDKReferences>false</WinUISDKReferences>
     <EnableMsixTooling>true</EnableMsixTooling>
     <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <!--
+    Build flavour. Defaults to Msix so F5 and a plain build keep working as before.
+    build.ps1 drives all three; see that script for the full commands.
+  -->
+  <PropertyGroup>
+    <Packaging Condition="'$(Packaging)' == ''">Msix</Packaging>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Packaging)' == 'Msix'">
+    <PublishProfile>win-$(Platform).pubxml</PublishProfile>
+  </PropertyGroup>
+
+  <!-- One big .exe that runs anywhere: bundles .NET and the Windows App SDK runtime. -->
+  <PropertyGroup Condition="'$(Packaging)' == 'SelfContained'">
+    <!-- No package identity - the app runs straight from the .exe. -->
+    <WindowsPackageType>None</WindowsPackageType>
+    <WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
+    <SelfContained>true</SelfContained>
+    <PublishSingleFile>true</PublishSingleFile>
+    <IncludeAllContentForSelfExtract>true</IncludeAllContentForSelfExtract>
+  </PropertyGroup>
+
+  <!-- Small output, but the target machine needs .NET and the Windows App SDK runtime. -->
+  <PropertyGroup Condition="'$(Packaging)' == 'FrameworkDependent'">
+    <WindowsPackageType>None</WindowsPackageType>
+    <WindowsAppSDKSelfContained>false</WindowsAppSDKSelfContained>
+    <SelfContained>false</SelfContained>
+    <PublishSingleFile>false</PublishSingleFile>
+    <!-- Trimming and R2R only apply to self-contained output. -->
+    <PublishTrimmed>false</PublishTrimmed>
+    <PublishReadyToRun>false</PublishReadyToRun>
   </PropertyGroup>
 
   <ItemGroup>
@@ -50,11 +82,17 @@
     <HasPackageAndPublishMenu>true</HasPackageAndPublishMenu>
   </PropertyGroup>
 
-  <!-- Publish Properties -->
+  <!--
+    Publish Properties.
+
+    This group runs after the Packaging blocks above and MSBuild takes the last value
+    written, so both settings are also gated on the flavour - trimming and ReadyToRun
+    only work on self-contained output (NETSDK1102 otherwise).
+  -->
   <PropertyGroup>
     <PublishReadyToRun Condition="'$(Configuration)' == 'Debug'">False</PublishReadyToRun>
-    <PublishReadyToRun Condition="'$(Configuration)' != 'Debug'">True</PublishReadyToRun>
+    <PublishReadyToRun Condition="'$(Configuration)' != 'Debug' and '$(Packaging)' != 'FrameworkDependent'">True</PublishReadyToRun>
     <PublishTrimmed Condition="'$(Configuration)' == 'Debug'">False</PublishTrimmed>
-    <PublishTrimmed Condition="'$(Configuration)' != 'Debug'">True</PublishTrimmed>
+    <PublishTrimmed Condition="'$(Configuration)' != 'Debug' and '$(Packaging)' != 'FrameworkDependent'">True</PublishTrimmed>
   </PropertyGroup>
 </Project>

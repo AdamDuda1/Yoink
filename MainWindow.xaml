@@ -15,19 +15,46 @@
 
     <Grid>
         <Grid.RowDefinitions>
-            <!-- Title Bar -->
             <RowDefinition Height="Auto" />
-            <!-- App Content -->
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
+
         <TitleBar x:Name="AppTitleBar"
-              Title="WinUI Notes">
+                  Title="Yoink Downloader">
             <TitleBar.IconSource>
-                <FontIconSource Glyph="XD"/>
+                <FontIconSource Glyph="&#xE896;" />
             </TitleBar.IconSource>
         </TitleBar>
 
-        <!-- App content -->
-        <Frame x:Name="rootFrame" Grid.Row="1"/>
+        <NavigationView x:Name="NavView"
+                        Grid.Row="1"
+                        IsBackButtonVisible="Collapsed"
+                        IsSettingsVisible="False"
+                        PaneDisplayMode="Left"
+                        OpenPaneLength="200"
+                        SelectionChanged="NavView_SelectionChanged">
+            <NavigationView.MenuItems>
+                <NavigationViewItem Content="Download" Tag="download" IsSelected="True">
+                    <NavigationViewItem.Icon>
+                        <SymbolIcon Symbol="Download" />
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
+                <NavigationViewItem Content="Queue" Tag="queue">
+                    <NavigationViewItem.Icon>
+                        <SymbolIcon Symbol="List" />
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
+            </NavigationView.MenuItems>
+
+            <NavigationView.FooterMenuItems>
+                <NavigationViewItem Content="Settings" Tag="settings">
+                    <NavigationViewItem.Icon>
+                        <SymbolIcon Symbol="Setting" />
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
+            </NavigationView.FooterMenuItems>
+
+            <Frame x:Name="ContentFrame" />
+        </NavigationView>
     </Grid>
 </Window>
