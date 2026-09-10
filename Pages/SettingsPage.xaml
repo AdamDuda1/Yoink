@@ -107,6 +107,8 @@
                     <TextBlock Text="A front end for yt-dlp and ffmpeg."
                                Style="{StaticResource CaptionTextBlockStyle}"
                                Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                    <TextBlock Text="This app is a general-purpose media downloader powered by yt-dlp and other tools listed. It is not affiliated with YouTube or any other platform it supports. Users are solely responsible for ensuring they have the right to download any content, and must comply with the terms of service and copyright laws applicable to them. The developer does not host, store, or distribute any downloaded content and accepts no liability for misuse"
+                               Foreground="OrangeRed" TextWrapping="WrapWholeWords" />
                 </StackPanel>
             </Border>
 
