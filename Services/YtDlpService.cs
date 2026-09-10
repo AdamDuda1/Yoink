@@ -1,50 +1,124 @@
-﻿using System;
+using System;
 using System.Diagnostics;
+using System.Globalization;
+using System.IO;
+using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 
 namespace Yoink_Downloader_Services
 {
     public class YtDlpService
     {
-    
-        public static void tr()
+        /// <summary>Same format string tr() used - merged mp4/m4a, falling back to whatever is best.</summary>
+        public const string DefaultFormat = "bestvideo[ext=mp4]+bestaudio[ext=m4a]/best";
+
+        public const string DefaultTemplate = "%(title)s.%(ext)s";
+
+        /// <summary>
+        /// Set this when ffmpeg is not on PATH (yours lives in Downloads). Left null, we
+        /// simply do not pass --ffmpeg-location and yt-dlp looks for it itself.
+        /// </summary>
+        public static string? FfmpegPath { get; set; }
+
+        // yt-dlp prints progress as "[download]  42.3% of 12.34MiB at ..."
+        private static readonly Regex ProgressPattern =
+            new(@"\[download\]\s+(\d+(?:\.\d+)?)%", RegexOptions.Compiled);
+
+        /// <summary>
+        /// Runs yt-dlp and returns its exit code (0 means success).
+        /// Reports percentage through <paramref name="progress"/> and every output line
+        /// through <paramref name="log"/>.
+        /// </summary>
+        public static async Task<int> DownloadAsync(
+            string url,
+            string outputFolder,
+            string? fileNameTemplate = null,
+            IProgress<double>? progress = null,
+            IProgress<string>? log = null)
         {
-            try
+            if (string.IsNullOrWhiteSpace(url))
             {
-                using (Process myProcess = new Process())
+                throw new ArgumentException("No URL given.", nameof(url));
+            }
+
+            Directory.CreateDirectory(outputFolder);
+
+            using var process = new Process();
+            var startInfo = process.StartInfo;
+
+            startInfo.FileName = "yt-dlp.exe";
+            // Running *in* the target folder means the -o template stays a bare file name,
+            // which sidesteps any quoting trouble with paths that contain spaces.
+            startInfo.WorkingDirectory = outputFolder;
+            startInfo.UseShellExecute = false;
+            startInfo.CreateNoWindow = true;
+            startInfo.RedirectStandardOutput = true;
+            startInfo.RedirectStandardError = true;
+
+            startInfo.ArgumentList.Add("-f");
+            startInfo.ArgumentList.Add(DefaultFormat);
+
+            if (!string.IsNullOrWhiteSpace(FfmpegPath))
+            {
+                startInfo.ArgumentList.Add("--ffmpeg-location");
+                startInfo.ArgumentList.Add(FfmpegPath);
+            }
+
+            // Without this yt-dlp redraws one progress line using \r, which never arrives
+            // as a completed line and so never reaches OutputDataReceived.
+            startInfo.ArgumentList.Add("--newline");
+
+            startInfo.ArgumentList.Add("-o");
+            startInfo.ArgumentList.Add(string.IsNullOrWhiteSpace(fileNameTemplate)
+                ? DefaultTemplate
+                : fileNameTemplate);
+
+            startInfo.ArgumentList.Add(url);
+
+            // Both of these fire on a threadpool thread, never the UI thread. Reporting
+            // through IProgress is what gets the values safely back to the UI - see the
+            // comment where the Progress<T> objects are created in DownloadPage.
+            process.OutputDataReceived += (_, e) =>
+            {
+                if (e.Data is null)
                 {
-                    myProcess.StartInfo.UseShellExecute = false;
-                    myProcess.StartInfo.WorkingDirectory = "C:\\Users\\adamd\\Downloads";
-                    myProcess.StartInfo.FileName = "yt-dlp.exe";
-                    myProcess.StartInfo.ArgumentList.Add("-f");
-                    myProcess.StartInfo.ArgumentList.Add("bestvideo[ext=mp4]+bestaudio[ext=m4a]/best");
-                    myProcess.StartInfo.ArgumentList.Add("--ffmpeg-location");
-                    myProcess.StartInfo.ArgumentList.Add(@"C:\Users\adamd\Downloads\ffmpeg.exe");
-                    myProcess.StartInfo.ArgumentList.Add("--verbose");
-                    myProcess.StartInfo.ArgumentList.Add("https://www.youtube.com/watch?v=FxKcM7xJoOQ");
-
-                    myProcess.StartInfo.RedirectStandardOutput = true;
-                    myProcess.StartInfo.RedirectStandardError = true;
-                    myProcess.StartInfo.CreateNoWindow = true;
-
-                    myProcess.OutputDataReceived += (sender, e) =>
-                    {
-                        if (e.Data != null) Debug.WriteLine("[OUT] " + e.Data);
-                    };
-                    myProcess.ErrorDataReceived += (sender, e) =>
-                    {
-                        if (e.Data != null) Debug.WriteLine("[ERR] " + e.Data);
-                    };
-
-                    myProcess.Start();
-                    myProcess.BeginOutputReadLine();
-                    myProcess.BeginErrorReadLine();
-                    myProcess.WaitForExit();
+                    return;
                 }
-            }
-            catch (Exception e)
+
+                log?.Report(e.Data);
+
+                var match = ProgressPattern.Match(e.Data);
+                if (match.Success &&
+                    // InvariantCulture matters: yt-dlp always prints "42.3", but on a
+                    // Polish system the default parse expects "42,3" and would fail.
+                    double.TryParse(match.Groups[1].Value, NumberStyles.Float,
+                        CultureInfo.InvariantCulture, out var percent))
+                {
+                    progress?.Report(percent);
+                }
+            };
+
+            process.ErrorDataReceived += (_, e) =>
             {
-                Console.WriteLine(e.Message);
-            }
+                if (e.Data is not null)
+                {
+                    log?.Report(e.Data);
+                }
+            };
+
+            process.Start();
+            process.BeginOutputReadLine();
+            process.BeginErrorReadLine();
+
+            // The async wait keeps the UI responsive - tr()'s WaitForExit() would have
+            // frozen the whole window until the download finished.
+            await process.WaitForExitAsync();
+
+            // Returns immediately (the process is already gone) but flushes the last of
+            // the redirected output, so no final lines get lost.
+            process.WaitForExit();
+
+            return process.ExitCode;
         }
-    }   
+    }
 }

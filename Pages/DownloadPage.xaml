@@ -88,11 +88,25 @@
             </Border>
 
             <!-- 6. Actions -->
-            <StackPanel Orientation="Horizontal" Spacing="8">
-                <Button Content="Add to queue"
-                        Style="{StaticResource AccentButtonStyle}"
-                        Click="OnAddToQueueClick" />
-                <Button Content="Reset" Click="OnResetClick" />
+            <StackPanel Spacing="8">
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <Button x:Name="DownloadButton"
+                            Content="Download"
+                            Style="{StaticResource AccentButtonStyle}"
+                            Click="OnDownloadClick" />
+                    <Button Content="Add to queue" />
+                    <Button Content="Reset" Click="OnResetClick" />
+                </StackPanel>
+
+                <ProgressBar x:Name="DownloadProgress"
+                             Maximum="100"
+                             Value="0"
+                             Visibility="Collapsed" />
+
+                <TextBlock x:Name="StatusText"
+                           Style="{StaticResource CaptionTextBlockStyle}"
+                           Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                           TextTrimming="CharacterEllipsis" />
             </StackPanel>
 
         </StackPanel>
