@@ -4,8 +4,10 @@ using System.Diagnostics;
 using System.IO;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Media.Imaging;
 using Windows.ApplicationModel.DataTransfer;
 using Yoink_Downloader_Services;
+using Yoink_Downloader.Services;
 
 namespace Yoink_Downloader.Pages
 {
@@ -52,15 +54,63 @@ namespace Yoink_Downloader.Pages
             }
         }
 
-        private void OnFetchClick(object sender, RoutedEventArgs e)
-        {
-            // TODO: ask yt-dlp for the metadata and fill in the info card.
-            ShowInfo("Not wired up yet.", InfoBarSeverity.Informational);
-        }
+        // private async void OnFetchClick(object sender, RoutedEventArgs e)
+        // {
+        //     var url = UrlBox.Text.Trim();
+        //     if (url.Length == 0)
+        //     {
+        //         ShowInfo("Paste a link first.", InfoBarSeverity.Warning);
+        //         return;
+        //     }
+        //
+        //     SourceInfoBar.IsOpen = false;
+        //     VideoTitleText.Text = "Loading...";
+        //     VideoMetaText.Text = "";
+        //
+        //     try
+        //     {
+        //         var info = await YtDlpService.FetchInfoAsync(url);
+        //
+        //         VideoTitleText.Text = info.Title;
+        //         VideoMetaText.Text = info.Duration > TimeSpan.Zero
+        //             ? $"{info.Uploader}  ·  {info.Duration:hh\\:mm\\:ss}"
+        //             : info.Uploader;
+        //
+        //         if (info.ThumbnailUrl is not null)
+        //         {
+        //             // BitmapImage fetches an http(s) source itself, off the UI thread.
+        //             ThumbnailImage.Source = new BitmapImage(new Uri(info.ThumbnailUrl));
+        //             ThumbnailImage.Visibility = Visibility.Visible;
+        //             ThumbnailPlaceholder.Visibility = Visibility.Collapsed;
+        //         }
+        //     }
+        //     catch (Win32Exception)
+        //     {
+        //         VideoTitleText.Text = "No video loaded";
+        //         ShowInfo("Could not start yt-dlp.exe - put it on PATH or next to the app.",
+        //             InfoBarSeverity.Error);
+        //     }
+        //     catch (Exception ex)
+        //     {
+        //         VideoTitleText.Text = "No video loaded";
+        //         ShowInfo(ex.Message, InfoBarSeverity.Error);
+        //     }
+        // }
+        //
+        // // BitmapImage failures are silent otherwise - you would just get an empty box.
+        // private void OnThumbnailFailed(object sender, ExceptionRoutedEventArgs e)
+        // {
+        //     ThumbnailImage.Visibility = Visibility.Collapsed;
+        //     ThumbnailPlaceholder.Visibility = Visibility.Visible;
+        // }
 
-        private void OnBrowseClick(object sender, RoutedEventArgs e)
+        private async void OnBrowseClick(object sender, RoutedEventArgs e)
         {
-            // TODO: folder picker -> FolderBox.Text.
+            var folder = await PickerHelper.PickFolderAsync();
+            if (folder is not null)
+            {
+                FolderBox.Text = folder;
+            }
         }
 
         // async void is normally a bug, but it is exactly right for an event handler -
@@ -106,7 +156,9 @@ namespace Yoink_Downloader.Pages
             try
             {
                 var exitCode = await YtDlpService.DownloadAsync(
-                    url, folder, TemplateBox.Text.Trim(), progress, log);
+                    url, folder, TemplateBox.Text.Trim(),
+                    TrimStartBox.Text, TrimEndBox.Text,
+                    progress, log);
 
                 if (exitCode == 0)
                 {
@@ -143,10 +195,18 @@ namespace Yoink_Downloader.Pages
             UrlBox.Text = "";
             FolderBox.Text = DefaultDownloadFolder();
             TemplateBox.Text = "";
+            TrimStartBox.Text = "";
+            TrimEndBox.Text = "";
             SourceInfoBar.IsOpen = false;
             StatusText.Text = "";
             DownloadProgress.Value = 0;
             DownloadProgress.Visibility = Visibility.Collapsed;
+
+            VideoTitleText.Text = "No video loaded";
+            VideoMetaText.Text = "Paste a link and hit Fetch info";
+            // ThumbnailImage.Source = null;
+            // ThumbnailImage.Visibility = Visibility.Collapsed;
+            // ThumbnailPlaceholder.Visibility = Visibility.Visible;
         }
 
         private void ShowInfo(string message, InfoBarSeverity severity)
