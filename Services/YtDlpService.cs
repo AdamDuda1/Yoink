@@ -5,7 +5,7 @@ using System.IO;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
-namespace Yoink_Downloader_Services
+namespace Yoink_Downloader.Services
 {
     public class YtDlpService
     {
@@ -23,6 +23,83 @@ namespace Yoink_Downloader_Services
         // yt-dlp prints progress as "[download]  42.3% of 12.34MiB at ..."
         private static readonly Regex ProgressPattern =
             new(@"\[download\]\s+(\d+(?:\.\d+)?)%", RegexOptions.Compiled);
+
+        /// <summary>
+        /// Runs "yt-dlp -J" and returns the video's metadata without downloading anything.
+        /// </summary>
+        public static async Task<VideoInfo> FetchInfoAsync(string url)
+        {
+            using var process = new Process();
+            var startInfo = process.StartInfo;
+
+            startInfo.FileName = "yt-dlp.exe";
+            startInfo.UseShellExecute = false;
+            startInfo.CreateNoWindow = true;
+            startInfo.RedirectStandardOutput = true;
+            startInfo.RedirectStandardError = true;
+
+            startInfo.ArgumentList.Add("-J");
+            startInfo.ArgumentList.Add("--no-playlist");
+            startInfo.ArgumentList.Add(url);
+
+            process.Start();
+
+            var stdoutTask = process.StandardOutput.ReadToEndAsync();
+            var stderrTask = process.StandardError.ReadToEndAsync();
+            await process.WaitForExitAsync();
+
+            var json = await stdoutTask;
+            var error = await stderrTask;
+
+            if (process.ExitCode != 0 || json.Length == 0)
+            {
+                throw new InvalidOperationException(
+                    error.Length > 0 ? error.Trim() : "yt-dlp could not read that link.");
+            }
+
+            using var document = JsonDocument.Parse(json);
+            var root = document.RootElement;
+
+            return new VideoInfo(
+                Title: GetString(root, "title") ?? "(untitled)",
+                Uploader: GetString(root, "uploader") ?? GetString(root, "channel") ?? "",
+                Duration: root.TryGetProperty("duration", out var d) && d.ValueKind == JsonValueKind.Number
+                    ? TimeSpan.FromSeconds(d.GetDouble())
+                    : TimeSpan.Zero,
+                ThumbnailUrl: PickThumbnail(root));
+
+            static string? GetString(JsonElement element, string name) =>
+                element.TryGetProperty(name, out var value) && value.ValueKind == JsonValueKind.String
+                    ? value.GetString()
+                    : null;
+
+            static string? PickThumbnail(JsonElement root)
+            {
+                if (root.TryGetProperty("thumbnails", out var thumbnails) &&
+                    thumbnails.ValueKind == JsonValueKind.Array)
+                {
+                    string? best = null;
+                    foreach (var entry in thumbnails.EnumerateArray())
+                    {
+                        var url = GetString(entry, "url");
+                        if (url is not null &&
+                            (url.Contains(".jpg", StringComparison.OrdinalIgnoreCase) ||
+                             url.Contains(".jpeg", StringComparison.OrdinalIgnoreCase) ||
+                             url.Contains(".png", StringComparison.OrdinalIgnoreCase)))
+                        {
+                            best = url;
+                        }
+                    }
+
+                    if (best is not null)
+                    {
+                        return best;
+                    }
+                }
+
+                return GetString(root, "thumbnail");
+            }
+        }
 
         /// <summary>
         /// Runs yt-dlp and returns its exit code (0 means success).
