@@ -3,7 +3,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
 
-namespace Yoink_Downloader_Services
+namespace Yoink_Downloader.Services
 {
     /// <summary>
     /// Straight ffmpeg calls for files that are already on disk - convert and/or trim.

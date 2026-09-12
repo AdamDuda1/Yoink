@@ -2,8 +2,9 @@ using System;
 using System.Threading.Tasks;
 using Windows.Storage;
 using Windows.Storage.Pickers;
+using Yoink_Downloader;
 
-namespace Yoink_Downloader_Services
+namespace Yoink_Downloader.Services
 {
     /// <summary>
     /// WinUI 3 pickers are not window-aware on their own - each one has to be handed the
@@ -45,12 +46,12 @@ namespace Yoink_Downloader_Services
 
         private static void Initialize(object picker)
         {
-            if (Yoink_Downloader.App.MainWindow is null)
+            if (App.MainWindow is null)
             {
                 return;
             }
 
-            var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(Yoink_Downloader.App.MainWindow);
+            var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(App.MainWindow);
             WinRT.Interop.InitializeWithWindow.Initialize(picker, hwnd);
         }
     }

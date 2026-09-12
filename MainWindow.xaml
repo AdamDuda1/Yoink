@@ -39,6 +39,11 @@
                         <SymbolIcon Symbol="Download" />
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
+                <NavigationViewItem Content="Convert" Tag="convert">
+                    <NavigationViewItem.Icon>
+                        <SymbolIcon Symbol="Trim" />
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
                 <NavigationViewItem Content="Queue" Tag="queue">
                     <NavigationViewItem.Icon>
                         <SymbolIcon Symbol="List" />
@@ -56,5 +61,25 @@
 
             <Frame x:Name="ContentFrame" />
         </NavigationView>
+
+        <!--Grid Grid.Row="1">
+            <InfoBar x:Name="LoadingBar"
+                 IsOpen="True"
+                 Severity="Informational"
+                 Title="Loading..."
+                 Message="Please wait"
+                 IsClosable="True"
+                 HorizontalAlignment="Right"
+                 VerticalAlignment="Bottom"
+                 Margin="0,0,20,20"
+                 MaxWidth="300">
+                < ! - -ProgressRing IsActive="True" Width="20" Height="20"/- ->
+            </InfoBar>
+
+            <InfoBar x:Name="LoadingBar2" IsOpen="True" IsClosable="True" IsIconVisible="False"
+ HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,20,20" Message="Hello">
+                <ProgressRing IsActive="True" Width="20" Height="20"/>
+            </InfoBar>
+        </Grid-->
     </Grid>
 </Window>

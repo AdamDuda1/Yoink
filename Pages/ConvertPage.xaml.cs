@@ -4,7 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
-using Yoink_Downloader_Services;
+using Yoink_Downloader.Services;
 
 namespace Yoink_Downloader.Pages
 {

@@ -1,4 +1,5 @@
 using System;
+using Microsoft.UI.Input;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media.Animation;
@@ -27,6 +28,7 @@ namespace Yoink_Downloader
 
             Type target = item.Tag switch
             {
+                "convert" => typeof(ConvertPage),
                 "queue" => typeof(QueuePage),
                 "settings" => typeof(SettingsPage),
                 _ => typeof(DownloadPage)
@@ -36,6 +38,14 @@ namespace Yoink_Downloader
             {
                 ContentFrame.Navigate(target, null, new EntranceNavigationTransitionInfo());
             }
+        }
+    }
+
+    public class CursorGrid : Grid
+    {
+        public InputSystemCursorShape CursorShape
+        {
+            set => ProtectedCursor = InputSystemCursor.Create(value);
         }
     }
 }
