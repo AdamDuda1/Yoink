@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Page
+    x:Class="Yoink_Downloader.Pages.ConvertPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="24,16,24,24">
+        <StackPanel Spacing="16" HorizontalAlignment="Stretch">
+
+            <TextBlock Text="Convert" Style="{StaticResource TitleTextBlockStyle}" />
+
+            <!-- Source file -->
+            <Border Style="{StaticResource CardStyle}">
+                <StackPanel Spacing="12">
+                    <TextBlock Text="File" Style="{StaticResource SectionHeaderStyle}" />
+
+                    <Grid ColumnSpacing="8">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <TextBox x:Name="InputBox" PlaceholderText="Pick a video or audio file" />
+                        <Button Grid.Column="1" Content="Browse..." Click="OnBrowseInputClick" />
+                    </Grid>
+
+                    <InfoBar x:Name="ConvertInfoBar"
+                             IsOpen="False"
+                             IsClosable="True"
+                             Severity="Informational" />
+                </StackPanel>
+            </Border>
+
+            <!-- Output format -->
+            <Border Style="{StaticResource CardStyle}">
+                <StackPanel Spacing="12">
+                    <TextBlock Text="Output" Style="{StaticResource SectionHeaderStyle}" />
+
+                    <Grid ColumnSpacing="12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel>
+                            <TextBlock Text="Format" Style="{StaticResource FieldLabelStyle}" />
+                            <ComboBox x:Name="FormatBox" Width="160" SelectedIndex="0">
+                                <ComboBoxItem Content="MP4" Tag="mp4" />
+                                <ComboBoxItem Content="MKV" Tag="mkv" />
+                                <ComboBoxItem Content="WebM" Tag="webm" />
+                                <ComboBoxItem Content="MP3" Tag="mp3" />
+                                <ComboBoxItem Content="M4A" Tag="m4a" />
+                                <ComboBoxItem Content="WAV" Tag="wav" />
+                            </ComboBox>
+                        </StackPanel>
+
+                        <CheckBox x:Name="CopyStreamsCheck"
+                                  Grid.Column="1"
+                                  VerticalAlignment="Bottom"
+                                  Margin="0,0,0,4"
+                                  Content="Copy streams (fast, no re-encode)" />
+                    </Grid>
+                </StackPanel>
+            </Border>
+
+            <!-- Trim -->
+            <Border Style="{StaticResource CardStyle}">
+                <StackPanel Spacing="12">
+                    <TextBlock Text="Trim" Style="{StaticResource SectionHeaderStyle}" />
+
+                    <Grid ColumnSpacing="12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel>
+                            <TextBlock Text="Start" Style="{StaticResource FieldLabelStyle}" />
+                            <TextBox x:Name="TrimStartBox" Width="120" PlaceholderText="00:00:00" />
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="1">
+                            <TextBlock Text="End" Style="{StaticResource FieldLabelStyle}" />
+                            <TextBox x:Name="TrimEndBox" Width="120" PlaceholderText="00:01:30" />
+                        </StackPanel>
+
+                        <TextBlock Grid.Column="2"
+                                   VerticalAlignment="Bottom"
+                                   Margin="0,0,0,6"
+                                   Style="{StaticResource CaptionTextBlockStyle}"
+                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                   TextWrapping="Wrap"
+                                   Text="Leave both blank to keep the whole file." />
+                    </Grid>
+                </StackPanel>
+            </Border>
+
+            <!-- Destination -->
+            <Border Style="{StaticResource CardStyle}">
+                <StackPanel Spacing="12">
+                    <TextBlock Text="Save to" Style="{StaticResource SectionHeaderStyle}" />
+
+                    <Grid ColumnSpacing="8">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <TextBox x:Name="FolderBox" PlaceholderText="Output folder" />
+                        <Button Grid.Column="1" Content="Browse..." Click="OnBrowseFolderClick" />
+                    </Grid>
+                </StackPanel>
+            </Border>
+
+            <!-- Actions -->
+            <StackPanel Spacing="8">
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <Button x:Name="ConvertButton"
+                            Content="Convert"
+                            Style="{StaticResource AccentButtonStyle}"
+                            Click="OnConvertClick" />
+                    <Button Content="Reset" Click="OnResetClick" />
+                </StackPanel>
+
+                <ProgressBar x:Name="ConvertProgress"
+                             IsIndeterminate="True"
+                             Visibility="Collapsed" />
+
+                <TextBlock x:Name="StatusText"
+                           Style="{StaticResource CaptionTextBlockStyle}"
+                           Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                           TextTrimming="CharacterEllipsis" />
+            </StackPanel>
+
+        </StackPanel>
+    </ScrollViewer>
+</Page>
