@@ -27,9 +27,12 @@
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*" />
                                 <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="Auto" />
                             </Grid.ColumnDefinitions>
                             <TextBox x:Name="YtDlpPathBox" PlaceholderText="yt-dlp.exe" />
                             <Button Grid.Column="1" Content="Browse..." Click="OnBrowseYtDlpClick" />
+                            <Button x:Name="InstallYtDlpButton" Grid.Column="2"
+                                    Content="Install" Click="OnInstallYtDlpClick" />
                         </Grid>
                     </StackPanel>
 
@@ -39,11 +42,36 @@
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*" />
                                 <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="Auto" />
                             </Grid.ColumnDefinitions>
                             <TextBox x:Name="FfmpegPathBox" PlaceholderText="ffmpeg.exe" />
                             <Button Grid.Column="1" Content="Browse..." Click="OnBrowseFfmpegClick" />
+                            <Button x:Name="InstallFfmpegButton" Grid.Column="2"
+                                    Content="Install" Click="OnInstallFfmpegClick" />
                         </Grid>
                     </StackPanel>
+
+                    <StackPanel>
+                        <TextBlock Text="aria2" Style="{StaticResource FieldLabelStyle}" />
+                        <Grid ColumnSpacing="8">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBox x:Name="Aria2PathBox" PlaceholderText="aria2c.exe" />
+                            <Button Grid.Column="1" Content="Browse..." Click="OnBrowseAria2Click" />
+                            <Button x:Name="InstallAria2Button" Grid.Column="2"
+                                    Content="Install" Click="OnInstallAria2Click" />
+                        </Grid>
+                    </StackPanel>
+
+                    <ProgressBar x:Name="InstallProgress" IsIndeterminate="True" Visibility="Collapsed" />
+
+                    <TextBlock x:Name="InstallStatusText"
+                               Style="{StaticResource CaptionTextBlockStyle}"
+                               Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                               TextTrimming="CharacterEllipsis" />
 
                     <InfoBar x:Name="ToolsInfoBar" IsOpen="False" IsClosable="True" Severity="Informational" />
                 </StackPanel>
@@ -103,12 +131,39 @@
             <Border Style="{StaticResource CardStyle}">
                 <StackPanel Spacing="4">
                     <TextBlock Text="About" Style="{StaticResource SectionHeaderStyle}" />
-                    <TextBlock Text="Yoink Downloader" Style="{StaticResource BodyTextBlockStyle}" />
-                    <TextBlock Text="A front end for yt-dlp and ffmpeg."
-                               Style="{StaticResource CaptionTextBlockStyle}"
-                               Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                    <TextBlock Text="Yoink Downloader version TODO EMBED VERSION + INFO" Style="{StaticResource BodyTextBlockStyle}" />
                     <TextBlock Text="This app is a general-purpose media downloader powered by yt-dlp and other tools listed. It is not affiliated with YouTube or any other platform it supports. Users are solely responsible for ensuring they have the right to download any content, and must comply with the terms of service and copyright laws applicable to them. The developer does not host, store, or distribute any downloaded content and accepts no liability for misuse"
                                Foreground="OrangeRed" TextWrapping="WrapWholeWords" />
+                    <StackPanel Orientation="Horizontal">
+
+                        <HyperlinkButton NavigateUri="https://github.com/adamduda1/yoink">
+                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                <FontIcon Glyph="&#xE943;" FontFamily="{StaticResource SymbolThemeFontFamily}" FontSize="16"/>
+                                <TextBlock Text="See GitHub Repo"/>
+                            </StackPanel>
+                        </HyperlinkButton>
+
+                        <HyperlinkButton NavigateUri="https://github.com/adamduda1/yoink">
+                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                <FontIcon Glyph="&#xE774;" FontFamily="{StaticResource SymbolThemeFontFamily}" FontSize="16"/>
+                                <TextBlock Text="See GitHub Repo"/>
+                            </StackPanel>
+                        </HyperlinkButton>
+
+                        <HyperlinkButton NavigateUri="https://github.com/adamduda1/yoink">
+                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                <FontIcon Glyph="&#xEBD3;" FontFamily="{StaticResource SymbolThemeFontFamily}" FontSize="16"/>
+                                <TextBlock Text="Get updates on Microsoft Store"/>
+                            </StackPanel>
+                        </HyperlinkButton>
+
+                        <HyperlinkButton NavigateUri="https://github.com/adamduda1/yoink">
+                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                <FontIcon Glyph="&#xf000;" FontFamily="{StaticResource SymbolThemeFontFamily}" FontSize="16"/>
+                                <TextBlock Text="License"/>
+                            </StackPanel>
+                        </HyperlinkButton>
+                    </StackPanel>
                 </StackPanel>
             </Border>
 
