@@ -1,4 +1,5 @@
 using System;
+using Windows.Graphics;
 using Microsoft.UI.Input;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
@@ -17,6 +18,11 @@ namespace Yoink_Downloader
             SetTitleBar(AppTitleBar);
 
             ContentFrame.Navigate(typeof(DownloadPage));
+
+            // if (Content is FrameworkElement root)
+            //     root.RequestedTheme = ElementTheme.Light;
+            var nonClientSource = InputNonClientPointerSource.GetForWindowId(AppWindow.Id);
+            nonClientSource.SetRegionRects(NonClientRegionKind.Passthrough, Array.Empty<RectInt32>());
         }
 
         private void NavView_SelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)
@@ -38,6 +44,17 @@ namespace Yoink_Downloader
             {
                 ContentFrame.Navigate(target, null, new EntranceNavigationTransitionInfo());
             }
+        }
+
+        private void AppTitleBar_PaneToggleRequested(TitleBar sender, object args)
+        {
+            NavView.IsPaneOpen = !NavView.IsPaneOpen;
+        }
+
+        public void SetPaneDisplayMode(NavigationViewPaneDisplayMode mode)
+        {
+            NavView.PaneDisplayMode = mode;
+            AppTitleBar.IsPaneToggleButtonVisible = mode != NavigationViewPaneDisplayMode.Top;
         }
     }
 

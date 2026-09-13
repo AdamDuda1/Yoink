@@ -20,19 +20,19 @@
         </Grid.RowDefinitions>
 
         <TitleBar x:Name="AppTitleBar"
-                  Title="Yoink Downloader">
-            <TitleBar.IconSource>
-                <FontIconSource Glyph="&#xE896;" />
-            </TitleBar.IconSource>
-        </TitleBar>
+                  Title="Yoink Downloader"
+                  IsPaneToggleButtonVisible="True"
+                  PaneToggleRequested="AppTitleBar_PaneToggleRequested"/>
 
         <NavigationView x:Name="NavView"
                         Grid.Row="1"
                         IsBackButtonVisible="Collapsed"
                         IsSettingsVisible="False"
-                        PaneDisplayMode="Left"
+                        IsPaneToggleButtonVisible="False"
+                        PaneDisplayMode="LeftCompact"
                         OpenPaneLength="200"
                         SelectionChanged="NavView_SelectionChanged">
+
             <NavigationView.MenuItems>
                 <NavigationViewItem Content="Download" Tag="download" IsSelected="True">
                     <NavigationViewItem.Icon>
@@ -62,7 +62,7 @@
             <Frame x:Name="ContentFrame" />
         </NavigationView>
 
-        <!--Grid Grid.Row="1">
+        <Grid Grid.Row="1">
             <InfoBar x:Name="LoadingBar"
                  IsOpen="True"
                  Severity="Informational"
@@ -73,13 +73,13 @@
                  VerticalAlignment="Bottom"
                  Margin="0,0,20,20"
                  MaxWidth="300">
-                < ! - -ProgressRing IsActive="True" Width="20" Height="20"/- ->
+                <!--ProgressRing IsActive="True" Width="20" Height="20"/-->
             </InfoBar>
 
             <InfoBar x:Name="LoadingBar2" IsOpen="True" IsClosable="True" IsIconVisible="False"
  HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,20,20" Message="Hello">
                 <ProgressRing IsActive="True" Width="20" Height="20"/>
             </InfoBar>
-        </Grid-->
+        </Grid>
     </Grid>
 </Window>

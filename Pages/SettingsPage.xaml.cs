@@ -132,5 +132,12 @@ namespace Yoink_Downloader.Pages
             ToolsInfoBar.Severity = severity;
             ToolsInfoBar.IsOpen = true;
         }
+
+
+        private void PaneDisplayModeCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            var tag = (string)((ComboBoxItem)PaneDisplayModeCombo.SelectedItem).Tag;
+            App.MainWindow!.SetPaneDisplayMode(Enum.Parse<NavigationViewPaneDisplayMode>(tag));
+        }
     }
 }

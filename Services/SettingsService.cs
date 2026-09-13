@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Text.Json;
 
@@ -12,6 +13,8 @@ namespace Yoink_Downloader.Services
 
     public class VideoDownloadOptions
     {
+        public bool EmbedThumbnail { get; set; } = false;
+        public bool EmbedSubtitles { get; set; } = false;
         public bool EmbedChapters { get; set; } = false;
     }
 
@@ -36,15 +39,17 @@ namespace Yoink_Downloader.Services
                 {
                     var json = File.ReadAllText(SettingsFilePath);
                     Current = JsonSerializer.Deserialize<Settings>(json) ?? new Settings();
+                    Debug.WriteLine("Settings loaded.");
                 }
                 else
                 {
                     Current = new Settings();
+                    Debug.WriteLine("Settings object created (couldn't find file).");
                 }
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error while loading settings from file: {ex.Message}");
+                Debug.WriteLine($"Error while loading settings from file: {ex.Message}");
                 Current = new Settings();
             }
         }
@@ -54,12 +59,15 @@ namespace Yoink_Downloader.Services
             try
             {
                 Directory.CreateDirectory(DataFolderPath);
+                Debug.WriteLine($"Folder exists: {Directory.Exists(DataFolderPath)}");
                 var json = JsonSerializer.Serialize(Current, _jsonOptions);
                 File.WriteAllText(SettingsFilePath, json);
+                Debug.WriteLine($"Writing settings to: {SettingsFilePath}");
+                Debug.WriteLine("Settings should be saved now.");
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error while writing settings to file: {ex.Message}");
+                Debug.WriteLine($"Error while writing settings to file: {ex.Message}");
             }
         }
     }

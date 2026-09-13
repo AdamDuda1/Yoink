@@ -5,6 +5,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:helpers="using:Yoink_Downloader.Helpers"
     mc:Ignorable="d">
 
     <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="24,16,24,24">
@@ -124,6 +125,53 @@
                     <ToggleSwitch x:Name="OpenFolderToggle"
                                   Header="Open the folder when a download finishes"
                                   OnContent="On" OffContent="Off" />
+                </StackPanel>
+            </Border>
+
+            <Border Style="{StaticResource CardStyle}">
+                <StackPanel>
+                    <ComboBox x:Name="PaneDisplayModeCombo"
+                              helpers:CursorHelper.ForceArrowCursor="True"
+                              Header="Navigation pane style"
+                              SelectionChanged="PaneDisplayModeCombo_SelectionChanged">
+                        <ComboBoxItem Content="Left (expanded)" Tag="Left" />
+                        <ComboBoxItem Content="Left compact" Tag="LeftCompact" />
+                        <ComboBoxItem Content="Left minimal" Tag="LeftMinimal" />
+                        <ComboBoxItem Content="Top" Tag="Top" />
+                    </ComboBox>
+
+                    <ComboBox x:Name="ThemeCombo" Header="App theme" helpers:CursorHelper.ForceArrowCursor="True" >
+                        <!-- SelectionChanged="ThemeCombo_SelectionChanged" -->
+                        <ComboBoxItem Content="System default" Tag="Default" />
+                        <ComboBoxItem Content="Light" Tag="Light" />
+                        <ComboBoxItem Content="Dark" Tag="Dark" />
+                    </ComboBox>
+
+                    <!-- <Button Content="Choose accent color"> -->
+                    <!--     <Button.Flyout> -->
+                    <!--         <Flyout> -->
+                    <!--             <ColorPicker x:Name="AccentColorPicker" -->
+                    <!--                          ColorSpectrumShape="Ring" -->
+                    <!--                          IsMoreButtonVisible="True" /> -->
+                    <!--         </Flyout> -->
+                    <!--     </Button.Flyout> -->
+                    <!-- </Button> -->
+
+                <!--     <Button> -->
+                <!--         <StackPanel Orientation="Horizontal" Spacing="8"> -->
+                <!--             <Border Width="16" Height="16" CornerRadius="4" -->
+                <!-- Background="{ThemeResource SystemAccentColorBrush}" /> -->
+                <!--             <TextBlock Text="Choose accent color" /> -->
+                <!--         </StackPanel> -->
+                <!--         <Button.Flyout> -->
+                <!--             <Flyout> -->
+                <!--                 <ColorPicker x:Name="AccentColorPicker" -->
+                <!--          ColorSpectrumShape="Ring" -->
+                <!--          IsMoreButtonVisible="True"/> -->
+                <!--                 ~1~ ColorChanged="AccentColorPicker_ColorChanged" @1@ -->
+                <!--             </Flyout> -->
+                <!--         </Button.Flyout> -->
+                <!--     </Button> -->
                 </StackPanel>
             </Border>
 

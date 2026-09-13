@@ -8,7 +8,7 @@ namespace Yoink_Downloader
     public partial class App : Application
     {
         /// <summary>The one and only window. Pickers need its HWND, so keep it reachable.</summary>
-        public static Window? MainWindow { get; private set; }
+        public static MainWindow? MainWindow { get; private set; }
 
         public App()
         {

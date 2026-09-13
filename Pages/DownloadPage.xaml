@@ -4,7 +4,10 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+    xmlns:pages="using:Yoink_Downloader.Pages" 
+    xmlns:yoinkDownloader="using:Yoink_Downloader" 
+    xmlns:helpers="using:Yoink_Downloader.Helpers"
     mc:Ignorable="d">
 
     <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="24,16,24,24">
@@ -22,9 +25,12 @@
                             <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
                         <TextBox x:Name="UrlBox"
-                                 PlaceholderText="Paste a video or playlist link"
-                                 TextChanged="OnOptionsChanged" />
-                        <Button Grid.Column="1" Content="Paste" Click="OnPasteClick" />
+                                 PlaceholderText="Paste a video or playlist link"/>
+                                 <!-- TextChanged="OnOptionsChanged" /> -->
+                        <Button Grid.Column="1" Click="OnPasteClick">
+                            <FontIcon Glyph="&#xE77F;" FontFamily="{StaticResource SymbolThemeFontFamily}"/>
+                        </Button>
+                        <!-- <Button Grid.Column="1" Content="&amp;#xE77F;" Click="OnPasteClick" /> -->
                         <Button Grid.Column="2" Content="Fetch info" Click="OnFetchClick" />
                     </Grid>
 
@@ -41,28 +47,61 @@
                 <StackPanel Spacing="12">
                     <TextBlock Text="Details" Style="{StaticResource SectionHeaderStyle}" Margin="0 0 0 0" />
 
-                    <Grid ColumnSpacing="16" Row="1">
+                    <TextBlock Style="{StaticResource CaptionTextBlockStyle}"
+                               Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                               TextWrapping="Wrap"
+                               Text="Press Fetch info to get up-to-date video info." />
+
+
+                    <ProgressBar x:Name="FetchingProgress"
+                                 IsIndeterminate="True"
+                                 Visibility="Collapsed"
+                                 VerticalAlignment="Stretch" />
+
+                    <Grid ColumnSpacing="16" Row="1" x:Name="MetadataBlock" Visibility="Collapsed">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto" />
                             <ColumnDefinition Width="*" />
                         </Grid.ColumnDefinitions>
 
-                        <Border Width="160" Height="90"
+                        <!-- <Border Width="160" Height="90" -->
+                        <!--         CornerRadius="4" -->
+                        <!--         x:Name="ThumbnailPlaceholder" -->
+                        <!--         Background="{ThemeResource ControlAltFillColorSecondaryBrush}"> -->
+                        <!--     <FontIcon Glyph="&#xE714;" -->
+                        <!--               FontSize="24" -->
+                        <!--               x:Name="ThumbnailImage" -->
+                        <!--               Foreground="{ThemeResource TextFillColorTertiaryBrush}" /> -->
+                        <!-- </Border> -->
+
+                        <Border Width="288" Height="150"
                                 CornerRadius="4"
-                                x:Name="ThumbnailImage"
                                 Background="{ThemeResource ControlAltFillColorSecondaryBrush}">
-                            <FontIcon Glyph="&#xE714;"
-                                      FontSize="24"
-                                      x:Name="ThumbnailImagePlaceholder"
-                                      Foreground="{ThemeResource TextFillColorTertiaryBrush}" />
+                            <Grid>
+                                <FontIcon x:Name="ThumbnailPlaceholder"
+                                          Glyph="&#xE714;"
+                                          FontSize="30"
+                                          Foreground="{ThemeResource TextFillColorTertiaryBrush}" />
+                                <Image x:Name="ThumbnailImage"
+                                       Stretch="UniformToFill"
+                                       Visibility="Collapsed"
+                                       ImageFailed="OnThumbnailFailed" />
+                            </Grid>
                         </Border>
 
                         <StackPanel Grid.Column="1" Spacing="4" VerticalAlignment="Center">
+                            <TextBlock Style="{StaticResource BodyTextBlockStyle}"
+                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}">
+                                <Run x:Name="VideoMetaText" />
+                                <Run Text=", " />
+                                <Hyperlink x:Name="VideoMetaTopLink">Open channel</Hyperlink>
+                            </TextBlock>
+
                             <TextBlock x:Name="VideoTitleText"
                                        Text="No video loaded"
                                        Style="{StaticResource SubtitleTextBlockStyle}"
                                        TextTrimming="CharacterEllipsis" />
-                            <TextBlock x:Name="VideoMetaText"
+                            <TextBlock x:Name="VideoAuthorText"
                                        Text="Paste a link and hit Fetch info"
                                        Style="{StaticResource BodyTextBlockStyle}"
                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
@@ -112,7 +151,7 @@
                             <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
-                        <TextBox x:Name="FolderBox" PlaceholderText="Output folder" TextChanged="OnOptionsChanged" />
+                        <TextBox x:Name="FolderBox" PlaceholderText="Output folder" TextChanged="OnDownloadOptionsChanged" />
                         <Button Grid.Column="1" Content="Browse..." Click="OnBrowseClick" />
                     </Grid>
 
@@ -120,12 +159,160 @@
                         <TextBlock Text="File name template" Style="{StaticResource FieldLabelStyle}" />
                         <TextBox x:Name="TemplateBox"
                                  PlaceholderText="%(title)s.%(ext)s"
-                                 FontFamily="Consolas"
-                                 TextChanged="OnOptionsChanged" />
+                                 FontFamily="Consolas" />
                     </StackPanel>
 
                 </StackPanel>
             </Border>
+
+            <!-- <Border Style="{StaticResource CardStyle}"> -->
+
+            <Expander
+                IsExpanded="False"
+                ExpandDirection="Down"
+                VerticalAlignment="Top"
+                HorizontalContentAlignment="Stretch"
+                HorizontalAlignment="Stretch">
+                <Expander.Header>
+                    <TextBlock>
+                        <Bold>Download options</Bold>
+                        </TextBlock>
+                </Expander.Header>
+
+                <StackPanel Spacing="12">
+                    <!-- <TextBlock Text="Download options" Style="{StaticResource SectionHeaderStyle}" /> -->
+
+                    <StackPanel Orientation="Horizontal" Spacing="20">
+                        <CheckBox x:Name="EmbedThumbnailCheckbox" Content="Embed thumbnail" Click="OnDownloadOptionsChanged" />
+                        <CheckBox x:Name="EmbedSubtitlesCheckbox" Content="Embed subtitles" Click="OnDownloadOptionsChanged" />
+                        <CheckBox x:Name="EmbedChaptersCheckbox" Content="Embed chapters" Click="OnDownloadOptionsChanged" />
+                    </StackPanel>
+
+                    <StackPanel Orientation="Horizontal" Spacing="0">
+                        <CheckBox x:Name="UseAria2Checkbox" Content="Use aria2"
+                                  Margin="0 0 -25 0" />
+                        <FontIcon Glyph="&#xE783;" x:Name="Aria2ToolTipIcon"
+                                  FontFamily="{StaticResource SymbolThemeFontFamily}"
+                                  FontSize="14"
+                                  helpers:CursorHelper.ForceArrowCursor="True"
+                                  VerticalAlignment="Center"
+                                  PointerEntered="Aria2ToolTip_PointerEntered"
+                                  PointerExited="Aria2ToolTip_PointerExited">
+                            <ToolTipService.ToolTip>
+                                <ToolTip x:Name="Aria2ToolTip" Placement="Right" MaxWidth="390">
+                                    <TextBlock TextWrapping="Wrap"
+                                               FontSize="14">
+                                        <Run Text="Uses aria2c for faster, multi-connection downloads. Requires aria2c installed on your system (check in settings). Enabling this can significantly speed up downloads for large files by using multiple connections."/>
+                                        <Bold>The progress indicator may behave weirdly.</Bold>
+                                    </TextBlock>
+                                </ToolTip>
+                            </ToolTipService.ToolTip>
+                        </FontIcon>
+                    </StackPanel>
+
+                    <Border Style="{StaticResource CardStyle}" Visibility="{x:Bind GetVisibility(UseAria2Checkbox.IsChecked), Mode=OneWay}">
+                        <StackPanel Spacing="12">
+                            <Grid ColumnSpacing="12">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+
+                                <ComboBox x:Name="MaxConnectionsCombo"
+                                          HorizontalAlignment="Stretch"
+                                          Header="Connections per server"
+                                          SelectedIndex="3">
+                                    <ComboBoxItem Content="1" />
+                                    <ComboBoxItem Content="4" />
+                                    <ComboBoxItem Content="8" />
+                                    <ComboBoxItem Content="16" />
+                                </ComboBox>
+
+                                <!-- TODO <ComboBox IsEditable="True" ItemsSource="{x:Bind FontSizes}" Width="200" TextSubmitted="Combo3_TextSubmitted"/> -->
+
+                                <ComboBox x:Name="SplitsCombo"
+                                          Grid.Column="1"
+                                          HorizontalAlignment="Stretch"
+                                          Header="Split into pieces"
+                                          SelectedIndex="2">
+                                    <ComboBoxItem Content="4" />
+                                    <ComboBoxItem Content="8" />
+                                    <ComboBoxItem Content="16" />
+                                    <ComboBoxItem Content="32" />
+                                    <ComboBoxItem Content="64" />
+                                </ComboBox>
+
+                                <ComboBox x:Name="MinSplitSizeCombo"
+                                          Grid.Column="2"
+                                          HorizontalAlignment="Stretch"
+                                          Header="Min piece size"
+                                          SelectedIndex="0">
+                                    <ComboBoxItem Content="1M" />
+                                    <ComboBoxItem Content="2M" />
+                                    <ComboBoxItem Content="5M" />
+                                    <ComboBoxItem Content="10M" />
+                                </ComboBox>
+                            </Grid>
+
+                            <TextBlock Style="{StaticResource CaptionTextBlockStyle}"
+                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                       TextWrapping="Wrap"
+                                       Text="aria2 caps connections per server at 16. A file smaller than the minimum piece size is never split, so raising it disables splitting for short videos." />
+                        </StackPanel>
+                    </Border>
+
+
+                    <StackPanel Orientation="Horizontal" Spacing="0">
+                        <CheckBox x:Name="PassVisitorDataCheckbox" Content="Pass visitor data"
+                                  Margin="0 0 10 0" />
+                        <FontIcon Glyph="&#xE783;" x:Name="PassVisitorDataToolTipIcon"
+                                  FontFamily="{StaticResource SymbolThemeFontFamily}"
+                                  FontSize="14"
+                                  helpers:CursorHelper.ForceArrowCursor="True"
+                                  VerticalAlignment="Center"
+                                  PointerEntered="PassVisitorDataToolTip_PointerEntered"
+                                  PointerExited="PassVisitorDataToolTip_PointerExited">
+                            <ToolTipService.ToolTip>
+                                <ToolTip x:Name="PassVisitorDataToolTip" Placement="Right" MaxWidth="550">
+                                    <TextBlock TextWrapping="Wrap"
+                                               FontSize="14">
+                                        Enabling this can help with the <Italic>Error 429: Too Many Requests</Italic> or <Italic>Unauthorized</Italic> error.
+                                        Use this setting to send cookies to YouTube proving that you are a human.
+                                        <!-- <Bold>Please read the linked guide on how to set this up.</Bold> -->
+                                    </TextBlock>
+                                </ToolTip>
+                            </ToolTipService.ToolTip>
+                        </FontIcon>
+                    </StackPanel>
+                    <Border Style="{StaticResource CardStyle}" Visibility="{x:Bind GetVisibility(PassVisitorDataCheckbox.IsChecked), Mode=OneWay}">
+                        <StackPanel Spacing="12">
+                            <ComboBox x:Name="PassVisitorDataTypeCombo"
+                                          HorizontalAlignment="Left"
+                                          Header="Mode"
+                                          SelectedIndex="0">
+                                <ComboBoxItem Content="Cookies from browser (recommended)" />
+                                <ComboBoxItem Content="Cookies from file" />
+                                <ComboBoxItem Content="visitor_data value (advanced)" />
+                            </ComboBox>
+                            <ComboBox x:Name="PassVisitorDataBrowserCombo"
+                                          HorizontalAlignment="Left"
+                                          Header="Browser"
+                                          SelectedIndex="0">
+                                <ComboBoxItem Content="firefox" />
+                                <ComboBoxItem Content="chrome" />
+                                <ComboBoxItem Content="edge" />
+                                <ComboBoxItem Content="brave" />
+                                <ComboBoxItem Content="vivaldi" />
+                                <ComboBoxItem Content="opera" />
+                            </ComboBox>
+
+                            <Button Content="Add to queue" />
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </Expander>
+            <!-- </Border> -->
 
             <!-- 6. Actions -->
             <StackPanel Spacing="8">

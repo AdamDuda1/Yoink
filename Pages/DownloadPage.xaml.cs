@@ -2,11 +2,13 @@ using System;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
+using Microsoft.UI.Input;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Controls.Primitives;
+using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media.Imaging;
 using Windows.ApplicationModel.DataTransfer;
-using Yoink_Downloader_Services;
 using Yoink_Downloader.Services;
 
 namespace Yoink_Downloader.Pages
@@ -24,10 +26,14 @@ namespace Yoink_Downloader.Pages
         /// <summary>Last line yt-dlp printed, so a failure can say something useful.</summary>
         private string _lastOutputLine = "";
 
+        private SettingsService _settingsService = new();
+
         public DownloadPage()
         {
             InitializeComponent();
             _isLoaded = true;
+            
+            _settingsService.Load();
 
             FolderBox.Text = DefaultDownloadFolder();
         }
@@ -37,12 +43,19 @@ namespace Yoink_Downloader.Pages
 
         // Shared hook for every option control. The signature is deliberately loose so
         // TextChanged / SelectionChanged / Toggled / Checked can all point at it.
-        private void OnOptionsChanged(object sender, object e)
+        private void OnDownloadOptionsChanged(object sender, object e)
         {
             if (!_isLoaded)
             {
                 return;
             }
+
+            _settingsService.Current.VideoDownloadOptions.EmbedThumbnail = EmbedThumbnailCheckbox.IsChecked.Equals(true);
+            _settingsService.Current.VideoDownloadOptions.EmbedSubtitles = EmbedSubtitlesCheckbox.IsChecked.Equals(true);
+            _settingsService.Current.VideoDownloadOptions.EmbedChapters = EmbedChaptersCheckbox.IsChecked.Equals(true);
+            _settingsService.Save();
+
+            Debug.WriteLine("Shots fired.");
         }
 
         private async void OnPasteClick(object sender, RoutedEventArgs e)
@@ -54,62 +67,93 @@ namespace Yoink_Downloader.Pages
             }
         }
 
-        // private async void OnFetchClick(object sender, RoutedEventArgs e)
-        // {
-        //     var url = UrlBox.Text.Trim();
-        //     if (url.Length == 0)
-        //     {
-        //         ShowInfo("Paste a link first.", InfoBarSeverity.Warning);
-        //         return;
-        //     }
-        //
-        //     SourceInfoBar.IsOpen = false;
-        //     VideoTitleText.Text = "Loading...";
-        //     VideoMetaText.Text = "";
-        //
-        //     try
-        //     {
-        //         var info = await YtDlpService.FetchInfoAsync(url);
-        //
-        //         VideoTitleText.Text = info.Title;
-        //         VideoMetaText.Text = info.Duration > TimeSpan.Zero
-        //             ? $"{info.Uploader}  ·  {info.Duration:hh\\:mm\\:ss}"
-        //             : info.Uploader;
-        //
-        //         if (info.ThumbnailUrl is not null)
-        //         {
-        //             // BitmapImage fetches an http(s) source itself, off the UI thread.
-        //             ThumbnailImage.Source = new BitmapImage(new Uri(info.ThumbnailUrl));
-        //             ThumbnailImage.Visibility = Visibility.Visible;
-        //             ThumbnailPlaceholder.Visibility = Visibility.Collapsed;
-        //         }
-        //     }
-        //     catch (Win32Exception)
-        //     {
-        //         VideoTitleText.Text = "No video loaded";
-        //         ShowInfo("Could not start yt-dlp.exe - put it on PATH or next to the app.",
-        //             InfoBarSeverity.Error);
-        //     }
-        //     catch (Exception ex)
-        //     {
-        //         VideoTitleText.Text = "No video loaded";
-        //         ShowInfo(ex.Message, InfoBarSeverity.Error);
-        //     }
-        // }
-        //
-        // // BitmapImage failures are silent otherwise - you would just get an empty box.
-        // private void OnThumbnailFailed(object sender, ExceptionRoutedEventArgs e)
-        // {
-        //     ThumbnailImage.Visibility = Visibility.Collapsed;
-        //     ThumbnailPlaceholder.Visibility = Visibility.Visible;
-        // }
+        private async void OnFetchClick(object sender, RoutedEventArgs e)
+        {
+            var url = UrlBox.Text.Trim();
+            if (url.Length < 4)
+            {
+                ShowInfo("Paste a valid link first.", InfoBarSeverity.Warning);
+                return;
+            }
+        
+            SourceInfoBar.IsOpen = false;
+            FetchingProgress.Visibility = Visibility.Visible;
+            MetadataBlock.Visibility = Visibility.Collapsed;
+            VideoTitleText.Text = "Loading...";
+            VideoMetaText.Text = "";
+        
+            try
+            {
+                var info = await YtDlpService.FetchInfoAsync(url);
+        
+                VideoTitleText.Text = info.Title;
+                VideoAuthorText.Text = info.Duration > TimeSpan.Zero
+                    ? $"{info.Uploader}  ·  {info.Duration:hh\\:mm\\:ss}"
+                    : info.Uploader;
+                VideoMetaText.Text = info.Id + " (Payload " + info.PayloadSize + ")";
+                VideoMetaTopLink.NavigateUri = new Uri(info.UploaderLink);
+
+                if (info.ThumbnailUrl is not null)
+                {
+                    // BitmapImage fetches an http(s) source itself, off the UI thread.
+                    ThumbnailImage.Source = new BitmapImage(new Uri(info.ThumbnailUrl));
+                    ThumbnailImage.Visibility = Visibility.Visible;
+                    ThumbnailPlaceholder.Visibility = Visibility.Collapsed;
+                }
+
+                FetchingProgress.Visibility = Visibility.Collapsed;
+                MetadataBlock.Visibility = Visibility.Visible;
+            }
+            catch (Win32Exception)
+            {
+                VideoTitleText.Text = "No video loaded";
+                ShowInfo("Could not start yt-dlp.exe - put it on PATH or next to the app.",
+                    InfoBarSeverity.Error);
+            }
+            catch (Exception ex)
+            {
+                VideoTitleText.Text = "No video loaded";
+                ShowInfo(ex.Message, InfoBarSeverity.Error);
+            }
+        }
+        
+        // BitmapImage failures are silent otherwise - you would just get an empty box.
+        private void OnThumbnailFailed(object sender, ExceptionRoutedEventArgs e)
+        {
+            ThumbnailImage.Visibility = Visibility.Collapsed;
+            ThumbnailPlaceholder.Visibility = Visibility.Visible;
+        }
 
         private async void OnBrowseClick(object sender, RoutedEventArgs e)
         {
-            var folder = await PickerHelper.PickFolderAsync();
-            if (folder is not null)
+
+            // A ContentDialog needs a XamlRoot to know which window to show over, and
+            // every link in that chain is nullable - hence the guard rather than dots.
+            var xamlRoot = App.MainWindow?.Content?.XamlRoot;
+            if (xamlRoot is null)
             {
-                FolderBox.Text = folder;
+                return;
+            }
+
+            var dialog = new ContentDialog
+            {
+                Title = "Read dis:",
+                Content = "File Explorer is boutta open.",
+                PrimaryButtonText = "Ok, go on",
+                CloseButtonText = "NO NO NO NO NO NO NO CANCEL",
+                DefaultButton = ContentDialogButton.Primary,
+                XamlRoot = xamlRoot,
+            };
+
+            var result = await dialog.ShowAsync();
+
+            if (result == ContentDialogResult.Primary)
+            {
+                var folder = await PickerHelper.PickFolderAsync();
+                if (folder is not null)
+                {
+                    FolderBox.Text = folder;
+                }
             }
         }
 
@@ -155,10 +199,25 @@ namespace Yoink_Downloader.Pages
 
             try
             {
-                var exitCode = await YtDlpService.DownloadAsync(
-                    url, folder, TemplateBox.Text.Trim(),
-                    TrimStartBox.Text, TrimEndBox.Text,
-                    progress, log);
+                var request = new DownloadRequest
+                {
+                    Url = url,
+                    OutputFolder = folder,
+                    FileNameTemplate = TemplateBox.Text.Trim(),
+                    TrimStart = TrimStartBox.Text,
+                    TrimEnd = TrimEndBox.Text,
+
+                    EmbedThumbnail = EmbedThumbnailCheckbox.IsChecked == true,
+                    EmbedSubtitles = EmbedSubtitlesCheckbox.IsChecked == true,
+                    EmbedChapters = EmbedChaptersCheckbox.IsChecked == true,
+
+                    UseAria2 = UseAria2Checkbox.IsChecked == true,
+                    Aria2Connections = ComboInt(MaxConnectionsCombo, 16),
+                    Aria2Splits = ComboInt(SplitsCombo, 16),
+                    Aria2MinSplitSize = ComboText(MinSplitSizeCombo, "1M"),
+                };
+
+                var exitCode = await YtDlpService.DownloadAsync(request, progress, log);
 
                 if (exitCode == 0)
                 {
@@ -204,9 +263,9 @@ namespace Yoink_Downloader.Pages
 
             VideoTitleText.Text = "No video loaded";
             VideoMetaText.Text = "Paste a link and hit Fetch info";
-            // ThumbnailImage.Source = null;
-            // ThumbnailImage.Visibility = Visibility.Collapsed;
-            // ThumbnailPlaceholder.Visibility = Visibility.Visible;
+            ThumbnailImage.Source = null;
+            ThumbnailImage.Visibility = Visibility.Collapsed;
+            ThumbnailPlaceholder.Visibility = Visibility.Visible;
         }
 
         private void ShowInfo(string message, InfoBarSeverity severity)
@@ -214,6 +273,41 @@ namespace Yoink_Downloader.Pages
             SourceInfoBar.Message = message;
             SourceInfoBar.Severity = severity;
             SourceInfoBar.IsOpen = true;
+        }
+
+
+
+        /// <summary>Reads the selected ComboBoxItem's text, falling back if nothing is selected.</summary>
+        private static string ComboText(ComboBox box, string fallback) =>
+            (box.SelectedItem as ComboBoxItem)?.Content?.ToString() ?? fallback;
+
+        private static int ComboInt(ComboBox box, int fallback) =>
+            int.TryParse(ComboText(box, ""), out var value) ? value : fallback;
+
+        private Visibility GetVisibility(bool? isChecked) =>
+            isChecked == true ? Visibility.Visible : Visibility.Collapsed;
+
+        private void Aria2ToolTip_PointerEntered(object sender, PointerRoutedEventArgs e)
+        {
+            Aria2ToolTip.IsOpen = true;
+        }
+        private void Aria2ToolTip_PointerExited(object sender, PointerRoutedEventArgs e)
+        {
+            Aria2ToolTip.IsOpen = false;
+        }
+
+        private void PassVisitorDataToolTip_PointerEntered(object sender, PointerRoutedEventArgs e)
+        {
+            PassVisitorDataToolTip.IsOpen = true;
+        }
+        private void PassVisitorDataToolTip_PointerExited(object sender, PointerRoutedEventArgs e)
+        {
+            PassVisitorDataToolTip.IsOpen = false;
+        }
+
+        private void InfoIcon_Tapped(object sender, TappedRoutedEventArgs e)
+        {
+            FlyoutBase.ShowAttachedFlyout((FrameworkElement)sender);
         }
     }
 }
