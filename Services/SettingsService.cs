@@ -7,7 +7,12 @@ namespace Yoink_Downloader.Services
 {
     public class Settings
     {
-        public string Theme { get; set; } = "System"; // System/Dark/Light TODO check if api class members match
+        /// <summary>Matches Microsoft.UI.Xaml.ElementTheme's names: Default/Light/Dark.</summary>
+        public string Theme { get; set; } = "Default";
+        public string PaneDisplayMode { get; set; } = "Left";
+        public string? YtDlpPath { get; set; }
+        public string? FfmpegPath { get; set; }
+        public string? Aria2Path { get; set; }
         public VideoDownloadOptions VideoDownloadOptions { get; set; } = new();
     }
 

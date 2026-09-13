@@ -140,38 +140,28 @@
                         <ComboBoxItem Content="Top" Tag="Top" />
                     </ComboBox>
 
-                    <ComboBox x:Name="ThemeCombo" Header="App theme" helpers:CursorHelper.ForceArrowCursor="True" >
-                        <!-- SelectionChanged="ThemeCombo_SelectionChanged" -->
+                    <ComboBox x:Name="ThemeCombo" Header="App theme" helpers:CursorHelper.ForceArrowCursor="True"
+                              SelectionChanged="ThemeCombo_SelectionChanged">
                         <ComboBoxItem Content="System default" Tag="Default" />
                         <ComboBoxItem Content="Light" Tag="Light" />
                         <ComboBoxItem Content="Dark" Tag="Dark" />
                     </ComboBox>
 
-                    <!-- <Button Content="Choose accent color"> -->
-                    <!--     <Button.Flyout> -->
-                    <!--         <Flyout> -->
-                    <!--             <ColorPicker x:Name="AccentColorPicker" -->
-                    <!--                          ColorSpectrumShape="Ring" -->
-                    <!--                          IsMoreButtonVisible="True" /> -->
-                    <!--         </Flyout> -->
-                    <!--     </Button.Flyout> -->
-                    <!-- </Button> -->
-
-                <!--     <Button> -->
-                <!--         <StackPanel Orientation="Horizontal" Spacing="8"> -->
-                <!--             <Border Width="16" Height="16" CornerRadius="4" -->
-                <!-- Background="{ThemeResource SystemAccentColorBrush}" /> -->
-                <!--             <TextBlock Text="Choose accent color" /> -->
-                <!--         </StackPanel> -->
-                <!--         <Button.Flyout> -->
-                <!--             <Flyout> -->
-                <!--                 <ColorPicker x:Name="AccentColorPicker" -->
-                <!--          ColorSpectrumShape="Ring" -->
-                <!--          IsMoreButtonVisible="True"/> -->
-                <!--                 ~1~ ColorChanged="AccentColorPicker_ColorChanged" @1@ -->
-                <!--             </Flyout> -->
-                <!--         </Button.Flyout> -->
-                <!--     </Button> -->
+                    <Button>
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <Border Width="16" Height="16" CornerRadius="4"
+                Background="{ThemeResource SystemAccentColorBrush}" />
+                            <TextBlock Text="Choose accent color" />
+                        </StackPanel>
+                        <Button.Flyout>
+                            <Flyout>
+                                <ColorPicker x:Name="AccentColorPicker"
+                         ColorSpectrumShape="Ring"
+                         IsMoreButtonVisible="True"/>
+                                ~1~ ColorChanged="AccentColorPicker_ColorChanged" @1@
+                            </Flyout>
+                        </Button.Flyout>
+                    </Button>
                 </StackPanel>
             </Border>
 

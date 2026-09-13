@@ -32,8 +32,12 @@ namespace Yoink_Downloader.Pages
         {
             InitializeComponent();
             _isLoaded = true;
-            
+
             _settingsService.Load();
+            var options = _settingsService.Current.VideoDownloadOptions;
+            EmbedThumbnailCheckbox.IsChecked = options.EmbedThumbnail;
+            EmbedSubtitlesCheckbox.IsChecked = options.EmbedSubtitles;
+            EmbedChaptersCheckbox.IsChecked = options.EmbedChapters;
 
             FolderBox.Text = DefaultDownloadFolder();
         }
@@ -286,6 +290,10 @@ namespace Yoink_Downloader.Pages
 
         private Visibility GetVisibility(bool? isChecked) =>
             isChecked == true ? Visibility.Visible : Visibility.Collapsed;
+
+        /// <summary>Only the "Cookies from browser" option (index 0) needs a browser picker.</summary>
+        private Visibility GetVisibility(int selectedIndex) =>
+            selectedIndex == 0 ? Visibility.Visible : Visibility.Collapsed;
 
         private void Aria2ToolTip_PointerEntered(object sender, PointerRoutedEventArgs e)
         {

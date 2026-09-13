@@ -11,17 +11,54 @@ namespace Yoink_Downloader.Pages
     {
         private string _lastOutputLine = "";
 
+        private readonly SettingsService _settingsService = new();
+
+        /// <summary>Guards against saving the values right back while the page is still applying them on load.</summary>
+        private bool _isLoaded;
+
         public SettingsPage()
         {
             InitializeComponent();
 
-            YtDlpPathBox.Text = ToolPaths.YtDlpOverride ?? "";
-            FfmpegPathBox.Text = ToolPaths.FfmpegOverride ?? "";
-            Aria2PathBox.Text = ToolPaths.Aria2Override ?? "";
+            _settingsService.Load();
+            var settings = _settingsService.Current;
 
-            YtDlpPathBox.TextChanged += (_, _) => ToolPaths.YtDlpOverride = YtDlpPathBox.Text.Trim();
-            FfmpegPathBox.TextChanged += (_, _) => ToolPaths.FfmpegOverride = FfmpegPathBox.Text.Trim();
-            Aria2PathBox.TextChanged += (_, _) => ToolPaths.Aria2Override = Aria2PathBox.Text.Trim();
+            ToolPaths.YtDlpOverride = settings.YtDlpPath;
+            ToolPaths.FfmpegOverride = settings.FfmpegPath;
+            ToolPaths.Aria2Override = settings.Aria2Path;
+
+            YtDlpPathBox.Text = settings.YtDlpPath ?? "";
+            FfmpegPathBox.Text = settings.FfmpegPath ?? "";
+            Aria2PathBox.Text = settings.Aria2Path ?? "";
+
+            YtDlpPathBox.TextChanged += (_, _) => { ToolPaths.YtDlpOverride = YtDlpPathBox.Text.Trim(); SaveToolPaths(); };
+            FfmpegPathBox.TextChanged += (_, _) => { ToolPaths.FfmpegOverride = FfmpegPathBox.Text.Trim(); SaveToolPaths(); };
+            Aria2PathBox.TextChanged += (_, _) => { ToolPaths.Aria2Override = Aria2PathBox.Text.Trim(); SaveToolPaths(); };
+
+            SelectComboByTag(PaneDisplayModeCombo, settings.PaneDisplayMode);
+            SelectComboByTag(ThemeCombo, settings.Theme);
+
+            _isLoaded = true;
+        }
+
+        private static void SelectComboByTag(ComboBox combo, string tag)
+        {
+            foreach (var obj in combo.Items)
+            {
+                if (obj is ComboBoxItem { Tag: string itemTag } item && itemTag == tag)
+                {
+                    combo.SelectedItem = item;
+                    return;
+                }
+            }
+        }
+
+        private void SaveToolPaths()
+        {
+            _settingsService.Current.YtDlpPath = ToolPaths.YtDlpOverride;
+            _settingsService.Current.FfmpegPath = ToolPaths.FfmpegOverride;
+            _settingsService.Current.Aria2Path = ToolPaths.Aria2Override;
+            _settingsService.Save();
         }
 
         private async void OnBrowseYtDlpClick(object sender, RoutedEventArgs e)
@@ -136,8 +173,38 @@ namespace Yoink_Downloader.Pages
 
         private void PaneDisplayModeCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            var tag = (string)((ComboBoxItem)PaneDisplayModeCombo.SelectedItem).Tag;
+            if (PaneDisplayModeCombo.SelectedItem is not ComboBoxItem { Tag: string tag })
+            {
+                return;
+            }
+
             App.MainWindow!.SetPaneDisplayMode(Enum.Parse<NavigationViewPaneDisplayMode>(tag));
+
+            if (_isLoaded)
+            {
+                _settingsService.Current.PaneDisplayMode = tag;
+                _settingsService.Save();
+            }
+        }
+
+        private void ThemeCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (ThemeCombo.SelectedItem is not ComboBoxItem { Tag: string tag })
+            {
+                return;
+            }
+
+            if (App.MainWindow?.Content is FrameworkElement root &&
+                Enum.TryParse<ElementTheme>(tag, out var theme))
+            {
+                root.RequestedTheme = theme;
+            }
+
+            if (_isLoaded)
+            {
+                _settingsService.Current.Theme = tag;
+                _settingsService.Save();
+            }
         }
     }
 }

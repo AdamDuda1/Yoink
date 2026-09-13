@@ -5,6 +5,7 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media.Animation;
 using Yoink_Downloader.Pages;
+using Yoink_Downloader.Services;
 
 namespace Yoink_Downloader
 {
@@ -19,8 +20,13 @@ namespace Yoink_Downloader
 
             ContentFrame.Navigate(typeof(DownloadPage));
 
-            // if (Content is FrameworkElement root)
-            //     root.RequestedTheme = ElementTheme.Light;
+            var settings = new SettingsService();
+            settings.Load();
+            if (Content is FrameworkElement root && Enum.TryParse<ElementTheme>(settings.Current.Theme, out var theme))
+            {
+                root.RequestedTheme = theme;
+            }
+
             var nonClientSource = InputNonClientPointerSource.GetForWindowId(AppWindow.Id);
             nonClientSource.SetRegionRects(NonClientRegionKind.Passthrough, Array.Empty<RectInt32>());
         }

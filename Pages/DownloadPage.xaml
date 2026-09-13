@@ -298,7 +298,8 @@
                             <ComboBox x:Name="PassVisitorDataBrowserCombo"
                                           HorizontalAlignment="Left"
                                           Header="Browser"
-                                          SelectedIndex="0">
+                                          SelectedIndex="0"
+                                          Visibility="{x:Bind GetVisibility(PassVisitorDataTypeCombo.SelectedIndex), Mode=OneWay}">
                                 <ComboBoxItem Content="firefox" />
                                 <ComboBoxItem Content="chrome" />
                                 <ComboBoxItem Content="edge" />
@@ -307,7 +308,9 @@
                                 <ComboBoxItem Content="opera" />
                             </ComboBox>
 
-                            <Button Content="Add to queue" />
+                            <Button Content="Add cookies.exe" />
+
+<!--                              third option?-->
                         </StackPanel>
                     </Border>
                 </StackPanel>
